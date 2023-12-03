@@ -1,5 +1,4 @@
-CREATE TABLE
-    IF NOT EXISTS `ox_mdt_offenses` (
+CREATE TABLE `ox_mdt_offenses` (
         `label` varchar(100) NOT NULL,
         `type` ENUM('misdemeanor', 'felony', 'infraction') NOT NULL,
         `category` ENUM(
@@ -19,16 +18,19 @@ CREATE TABLE
         PRIMARY KEY (`label`) USING BTREE
     );
 
-CREATE TABLE
-    IF NOT EXISTS `ox_mdt_reports` (
-        `id` int (10) unsigned NOT NULL AUTO_INCREMENT,
-        `title` varchar(50) NOT NULL,
-        `description` text DEFAULT NULL,
-        `author` varchar(50) DEFAULT NULL,
-        `date` datetime DEFAULT curtime(),
-        PRIMARY KEY (`id`) USING BTREE,
-        FULLTEXT INDEX `title_desc_author` (`title`, `description`, `author`)
-    );
+CREATE TABLE `ox_mdt_reports` (
+ `id` int (10) unsigned NOT NULL AUTO_INCREMENT,
+ `title` varchar(50) NOT NULL,
+ `description` text DEFAULT NULL,
+ `author` varchar(50) DEFAULT NULL,
+ `date` datetime DEFAULT NULL,
+ PRIMARY KEY (`id`) USING BTREE,
+ FULLTEXT INDEX `title_desc_author` (`title`, `description`, `author`)
+);
+
+INSERT INTO `ox_mdt_reports` (`title`, `description`, `author`, `date`) 
+VALUES ('title', 'description', 'author', CURTIME());
+
 
 CREATE TABLE
     `ox_mdt_reports_criminals` (
@@ -44,8 +46,7 @@ CREATE TABLE
         CONSTRAINT `ox_mdt_reports_criminals_ibfk_2` FOREIGN KEY (`reportid`) REFERENCES `ox_mdt_reports` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
-CREATE TABLE
-    IF NOT EXISTS `ox_mdt_reports_officers` (
+CREATE TABLE `ox_mdt_reports_officers` (
         `reportid` int (10) unsigned NOT NULL,
         `stateid` VARCHAR(7) NOT NULL,
         KEY `FK_ox_mdt_reports_officers_characters` (`stateid`) USING BTREE,
@@ -54,8 +55,7 @@ CREATE TABLE
         CONSTRAINT `FK_ox_mdt_reports_officers_ox_mdt_reports` FOREIGN KEY (`reportid`) REFERENCES `ox_mdt_reports` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-CREATE TABLE
-    IF NOT EXISTS `ox_mdt_reports_charges` (
+CREATE TABLE `ox_mdt_reports_charges` (
         `reportid` int (10) unsigned NOT NULL,
         `stateid` VARCHAR(7) NOT NULL,
         `charge` VARCHAR(100) DEFAULT NULL,
@@ -70,8 +70,7 @@ CREATE TABLE
         CONSTRAINT `FK_ox_mdt_reports_charges_ox_mdt_reports_criminals_2` FOREIGN KEY (`stateid`) REFERENCES `ox_mdt_reports_criminals` (`stateid`) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-CREATE TABLE
-    IF NOT EXISTS `ox_mdt_reports_evidence` (
+CREATE TABLE `ox_mdt_reports_evidence` (
         `reportid` INT (10) UNSIGNED NOT NULL,
         `label` VARCHAR(50) NOT NULL DEFAULT '',
         `image` VARCHAR(90) NOT NULL DEFAULT '',
@@ -79,19 +78,17 @@ CREATE TABLE
         CONSTRAINT `FK__ox_mdt_reports` FOREIGN KEY (`reportid`) REFERENCES `ox_mdt_reports` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
-CREATE TABLE
-    IF NOT EXISTS `ox_mdt_announcements` (
-        `id` INT (11) UNSIGNED NOT NULL AUTO_INCREMENT,
-        `creator` VARCHAR(7) NOT NULL,
-        `contents` TEXT NOT NULL,
-        `createdAt` DATETIME NOT NULL DEFAULT curtime(),
-        PRIMARY KEY (`id`) USING BTREE,
-        INDEX `FK_ox_mdt_announcements_characters` (`creator`) USING BTREE,
-        CONSTRAINT `FK_ox_mdt_announcements_characters` FOREIGN KEY (`creator`) REFERENCES `characters` (`stateid`) ON UPDATE NO ACTION ON DELETE NO ACTION
-    );
+CREATE TABLE `ox_mdt_announcements` (
+ `id` INT (11) UNSIGNED NOT NULL AUTO_INCREMENT,
+ `creator` VARCHAR(7) NOT NULL,
+ `contents` TEXT NOT NULL,
+ `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ PRIMARY KEY (`id`) USING BTREE,
+ INDEX `FK_ox_mdt_announcements_characters` (`creator`) USING BTREE,
+ CONSTRAINT `FK_ox_mdt_announcements_characters` FOREIGN KEY (`creator`) REFERENCES `characters` (`stateid`) ON UPDATE NO ACTION ON DELETE NO ACTION
+);
 
-CREATE TABLE
-    IF NOT EXISTS `ox_mdt_warrants` (
+CREATE TABLE `ox_mdt_warrants` (
         `reportid` INT UNSIGNED NOT NULL,
         `stateid` VARCHAR(7) NOT NULL,
         `expiresAt` DATETIME NOT NULL,
@@ -99,8 +96,7 @@ CREATE TABLE
         CONSTRAINT `ox_mdt_warrants_ox_mdt_reports_id_fk` FOREIGN KEY (`reportid`) REFERENCES `ox_mdt_reports` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
-CREATE TABLE
-    IF NOT EXISTS `ox_mdt_profiles` (
+CREATE TABLE `ox_mdt_profiles` (
     `id` INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `stateid`  VARCHAR(7)  NOT NULL,
     `image`    VARCHAR(90) NULL,
@@ -113,19 +109,19 @@ CREATE TABLE
             ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS `ox_mdt_bolos`
+CREATE TABLE `ox_mdt_bolos`
 (
-    `id`        INT UNSIGNED AUTO_INCREMENT
-        PRIMARY KEY,
-    `creator`   VARCHAR(7)                 NOT NULL,
-    `contents`  TEXT                       NULL,
-    `createdAt` DATETIME DEFAULT curtime() NOT NULL,
-    CONSTRAINT `ox_mdt_bolos_ox_mdt_profiles_stateid_fk`
-        FOREIGN KEY (`creator`) REFERENCES `ox_mdt_profiles` (`stateid`)
-            ON UPDATE CASCADE ON DELETE CASCADE
+   `id`       INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+   `creator`  VARCHAR(7)                NOT NULL,
+   `contents` TEXT                     NULL,
+   `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+   CONSTRAINT `ox_mdt_bolos_ox_mdt_profiles_stateid_fk`
+       FOREIGN KEY (`creator`) REFERENCES `ox_mdt_profiles` (`stateid`)
+           ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS `ox_mdt_bolos_images`
+
+CREATE TABLE `ox_mdt_bolos_images`
 (
     `boloId` INT UNSIGNED NOT NULL,
     `image`  VARCHAR(90)  NULL,
